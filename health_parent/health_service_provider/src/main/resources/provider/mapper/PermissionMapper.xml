@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="provider.mapper.PermissionMapper">
+
+    <select id="findByRoleId" parameterType="int" resultType="common.entity.Permission">
+        select p.*
+        from health.t_permission p left join health.t_role_permission rp
+        on p.id = rp.permission_id
+        where rp.role_id = #{roleId}
+    </select>
+
+</mapper>

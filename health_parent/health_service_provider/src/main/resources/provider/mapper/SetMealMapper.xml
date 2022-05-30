@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="provider.mapper.SetMealMapper">
+    <insert id="insert" parameterType="common.entity.Setmeal">
+        <!-- 获得自增生成的id值，并赋值给 Setmeal对象的id属性 -->
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select last_insert_id()
+        </selectKey>
+        insert into health.t_setmeal(name, code, helpCode, sex, age, price, remark, attention, img)
+            values
+        (#{name}, #{code}, #{helpCode}, #{sex}, #{age}, #{price}, #{remark}, #{attention}, #{img})
+    </insert>
+    <insert id="bindSetMealAndCheckGroup" parameterType="map">
+        insert into health.t_setmeal_checkgroup
+            (setmeal_id, checkgroup_id)
+        values
+            (#{setmeal_id}, #{checkgroup_id})
+    </insert>
+
+    <update id="update" parameterType="common.entity.Setmeal">
+        update health.t_setmeal
+        <set>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="img != null">
+                img = #{img},
+            </if>
+            <if test="age != null">
+                age = #{age},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTemporaryBySetMealId" parameterType="java.lang.Integer">
+        delete from health.t_setmeal_checkgroup where setmeal_id = #{setmealId}
+    </delete>
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete from health.t_setmeal where id = #{setmealId}
+    </delete>
+
+    <select id="findByCondition" resultType="common.entity.Setmeal">
+        select * from health.t_setmeal
+        <if test="value != null and value.length > 0">
+            where code = #{value} or name = #{value} or helpCode = #{value}
+        </if>
+    </select>
+    <select id="findCheckGroupIdsBySetMealId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select * from health.t_setmeal_checkgroup where setmeal_id = #{setmealId}
+    </select>
+    <select id="findAll" resultType="common.entity.Setmeal">
+        select * from health.t_setmeal
+    </select>
+    
+    <resultMap id="baseResultMap" type="common.entity.Setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+    </resultMap>
+    <resultMap id="findCheckGroupsByIdResultMap" type="common.entity.Setmeal" extends="baseResultMap">
+        <collection
+                select="provider.mapper.CheckGroupMapper.findBySetMealId"
+                column="id"
+                property="checkGroups"
+                javaType="java.util.List"
+                ofType="common.entity.CheckGroup"
+        />
+    </resultMap>
+    <select id="findById" parameterType="java.lang.Integer" resultMap="findCheckGroupsByIdResultMap">
+        select * from health.t_setmeal where id = #{id}
+    </select>
+</mapper>

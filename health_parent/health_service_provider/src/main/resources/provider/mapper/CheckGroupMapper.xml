@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="provider.mapper.CheckGroupMapper">
+    <insert id="insert" parameterType="common.entity.CheckGroup">
+        <!-- 获得自增生成的id值，并赋值给 CheckGroup对象的id属性 -->
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select last_insert_id()
+        </selectKey>
+        insert into health.t_checkgroup
+            (code, name, sex, helpCode, remark, attention)
+        values
+            (#{code}, #{name}, #{sex}, #{helpCode}, #{remark}, #{attention})
+    </insert>
+    <insert id="bindCheckGroupAndCheckItem" parameterType="map">
+        insert into health.t_checkgroup_checkitem
+            (checkgroup_id, checkitem_id)
+        values
+            (#{checkgroup_id}, #{checkitem_id})
+    </insert>
+
+    <update id="update" parameterType="common.entity.CheckGroup">
+        update health.t_checkgroup
+        <set>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTemporaryByCheckGroupId" parameterType="java.lang.Integer">
+        delete from health.t_checkgroup_checkitem where checkgroup_id = #{checkgroupId}
+    </delete>
+    <delete id="deleteById">
+        delete from health.t_checkgroup where id = #{checkgroupId}
+    </delete>
+
+    <select id="findByCondition" parameterType="string" resultType="common.entity.CheckGroup">
+        select * from health.t_checkgroup
+        <if test="value != null and value.length > 0">
+            where code = #{value} or name = #{value} or helpcode = #{value}
+        </if>
+    </select>
+    <select id="findCheckItemIdsByCheckGroupId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select checkitem_id from health.t_checkgroup_checkitem where checkgroup_id = #{checkgroupId}
+    </select>
+    <select id="findAll" resultType="common.entity.CheckGroup">
+        select * from health.t_checkgroup
+    </select>
+
+    <resultMap id="baseResultMap" type="common.entity.CheckGroup">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+    </resultMap>
+    <resultMap id="findCheckItemsByIdResultMap" type="common.entity.CheckGroup" extends="baseResultMap">
+        <collection
+                select="provider.mapper.CheckItemMapper.findByCheckGroupId"
+                column="id"
+                property="checkItems"
+                javaType="java.util.List"
+                ofType="common.entity.CheckItem"
+        />
+    </resultMap>
+    <select id="findBySetMealId" resultMap="findCheckItemsByIdResultMap">
+        select * from health.t_checkgroup
+            where
+        id in (select checkgroup_id from health.t_setmeal_checkgroup where setmeal_id = #{id})
+    </select>
+</mapper>

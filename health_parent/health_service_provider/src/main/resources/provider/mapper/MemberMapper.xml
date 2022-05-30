@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="provider.mapper.MemberMapper">
+
+    <insert id="insert" parameterType="common.entity.Member">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select last_insert_id()
+        </selectKey>
+        insert into health.t_member
+            (fileNumber, name, sex, idCard, phoneNumber, regTime, password, email, birthday, remark)
+        values
+            (#{fileNumber}, #{name}, #{sex}, #{idCard}, #{phoneNumber}, #{regTime}, #{password}, #{email}, #{birthday}, #{remark})
+    </insert>
+    <update id="update" parameterType="common.entity.Member">
+        update health.t_member
+        <set>
+            <if test="fileNumber != null">
+                fileNumber = #{fileNumber},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="idCard != null">
+                idCard = #{idCard},
+            </if>
+            <if test="phoneNumber != null">
+                phoneNumber = #{phoneNumber},
+            </if>
+            <if test="regTime != null">
+                regTime = #{regTime},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            <if test="birthday != null">
+                birthday = #{birthday},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete from health.t_member where id = #{id}
+    </delete>
+
+    <select id="findByTelephone" parameterType="java.lang.String" resultType="common.entity.Member">
+        select * from health.t_member where phoneNumber = #{telephone}
+    </select>
+    <select id="findAll" resultType="common.entity.Member">
+        select * from health.t_member
+    </select>
+    <select id="findByCondition" parameterType="java.lang.String" resultType="common.entity.Member">
+        select * from health.t_member
+        <if test="value != null and value.length > 0">
+            where fileNumber = #{value} or phoneNumber = #{value} or name = #{value}
+        </if>
+    </select>
+    <select id="findById" parameterType="java.lang.Integer" resultType="common.entity.Member">
+        select * from health.t_member where id = #{id}
+    </select>
+    <select id="findCountBeforeDate" parameterType="java.lang.String" resultType="java.lang.Long">
+        select count(id) from health.t_member where regTime &lt;= #{date}
+    </select>
+    <select id="findCountByDate" parameterType="java.lang.String" resultType="java.lang.Long">
+        select count(id) from health.t_member where regTime = #{date}
+    </select>
+    <select id="findCountAfterDate" parameterType="java.lang.String" resultType="java.lang.Long">
+        select count(id) from health.t_member where regTime &gt;= #{date}
+    </select>
+    <select id="findTotal" resultType="java.lang.Long">
+        select count(id) from health.t_member
+    </select>
+
+</mapper>
